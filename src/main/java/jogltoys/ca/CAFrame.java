@@ -2,6 +2,8 @@ package jogltoys.ca;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.eventbus.Subscribe;
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.opengl.GLWindow;
 import jogltoys.ca.CAScene.Projection;
 import jogltoys.ca.ModelManager.TimerEvent;
@@ -13,7 +15,6 @@ import jogltoys.ca.models.params.IntegerCellularAutomataParameter;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
-import javax.media.opengl.awt.GLCanvas;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -435,10 +436,10 @@ public class CAFrame extends JFrame {
 				Eye.LEFT.createConfigurator(yFov, interOcularDistance),
 				Eye.RIGHT.createConfigurator(yFov, interOcularDistance));
 
-		window.addMouseListener(new com.jogamp.newt.event.MouseAdapter() {
+		window.addMouseListener(new MouseAdapter() {
 
 			@Override
-			public void mouseClicked(com.jogamp.newt.event.MouseEvent e) {
+			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					window.setFullscreen(!window.isFullscreen());
 				}
@@ -449,9 +450,9 @@ public class CAFrame extends JFrame {
 	}
 
 	@SuppressWarnings("unused")
-	private Frame createFrame() {
+	private GLWindow createFrame() {
 
-		GLCanvas canvas = new GLCanvas(new GLCapabilities(
+		final GLWindow window = GLWindow.create(new GLCapabilities(
 				GLProfile.getDefault()));
 
 		int width = 1920;
@@ -459,30 +460,25 @@ public class CAFrame extends JFrame {
 		float interOcularDistance = 0.08f;
 		float yFov = 45f;
 
-		modelDisplay.register(canvas,
-				Eye.CENTRE.createConfigurator(yFov, interOcularDistance)
-				// Eye.LEFT.createConfigurator(yFov, interOcularDistance),
-				// Eye.RIGHT.createConfigurator(yFov, interOcularDistance)
-				);
+		modelDisplay.register(window,
+				Eye.CENTRE.createConfigurator(yFov, interOcularDistance));
 
-		final Frame frame = new Frame();
-		frame.add(canvas);
+		window.setSize(width, height);
 
-		frame.setLocation(0, 0);
-		frame.setSize(width, height);
+		window.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					window.setFullscreen(!window.isFullscreen());
+					// final GraphicsDevice device = window
+					// .getGraphicsConfiguration().getDevice();
+					// final boolean isFullScreen = device.getFullScreenWindow()
+					// == frame;
+					// device.setFullScreenWindow(isFullScreen ? null : frame);
+				}
+			}
+		});
 
-//		canvas.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				if (e.getClickCount() == 2) {
-//					final GraphicsDevice device = frame
-//							.getGraphicsConfiguration().getDevice();
-//					final boolean isFullScreen = device.getFullScreenWindow() == frame;
-//					device.setFullScreenWindow(isFullScreen ? null : frame);
-//				}
-//			}
-//		});
-
-		return frame;
+		return window;
 	}
 }
